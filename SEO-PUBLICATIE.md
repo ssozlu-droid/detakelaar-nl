@@ -42,3 +42,9 @@ Bevestig de juridische relatie met de KvK-inschrijving, de werkende zakelijke ma
 ## Meten
 
 Beoordeel in Search Console na indexering vertoningen, klikken, zoekvragen en indexeringsproblemen. Vergelijk perioden en let op zoekintentie, niet alleen op één handmatig opgezochte positie. AI-vermeldingen zijn veranderlijk en niet gegarandeerd. Verbeter inhoud met echte vragen van klanten en concrete, controleerbare informatie. Er zijn geen trackingcookies toegevoegd door deze update.
+
+## Postcodes en Google-reviews
+
+Door eigenaar bevestigd: Kampenringweg 17a, 2803 PE Gouda; Cobbenhagenstraat 24, 2288 ET Rijswijk. De postcodes staan in zichtbare adressen, kaartlinks en PostalAddress-gegevens.
+
+De homepage bevat een reviewsectie. De eigenaar bevestigt dat er nog geen Google Bedrijfsprofiel is. Maak eerst een profiel voor de werkelijke bedrijfsactiviteit en rond de verificatie af; neem daarna de reviewlink rechtstreeks uit dat profiel over. Tot die tijd wordt geen werkende Google-reviewknop gesuggereerd: er staat een korte melding dat dit binnenkort beschikbaar komt. Voeg daarna een geverifieerde review-URL als href toe aan #google-review-link, verwijder hidden en verwijder #google-review-pending. Geen verzonnen reviews, sterrenscores, beloningen of selectie op positieve ervaringen toevoegen.
