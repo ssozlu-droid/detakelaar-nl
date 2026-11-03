@@ -6,9 +6,9 @@
 - Direct leesbare Nederlandse HTML, inclusief telefoonlinks zonder JavaScript.
 - Drie onderling verbonden dienstpagina's: autotransport, pech- en schadevervoer, zorgvuldig autovervoer.
 - Zichtbare vragen en antwoorden met overeenkomstige FAQPage-gegevens; Organization, WebSite, WebPage en Service-gegevens; broodkruimels op dienstpagina's.
-- sitemap.xml en robots.txt. Geen verzonnen vestigingen, reviews, prijzen of openingstijden. Er is nog geen bevestigde vestigingsplaats; daarom geen lokaal adres in de gegevens.
+- sitemap.xml en robots.txt. Geen verzonnen vestigingen, reviews, prijzen of openingstijden. De eigenaar heeft contactlocaties in Gouda (Kampenringweg 17a) en Rijswijk (Cobbenhagenstraat 24) opgegeven. Deze zijn zichtbaar en als Organization.location opgenomen; er zijn geen openingstijden of bezoekgaranties ingevuld.
 
-Dit verbetert de begrijpelijkheid voor zoekmachines en AI-antwoorddiensten (SEO, GEO en AEO), maar garandeert geen rangschikking, indexering, AI-vermelding of rich result. Er bestaat geen speciale code die een toppositie oplevert. FAQ-rich-results worden door Google doorgaans beperkt tot gezaghebbende gezondheids- en overheidssites; verwacht die niet voor deze website. Organization zonder adres is een bewuste keuze totdat bedrijfsgegevens bevestigd zijn.
+Dit verbetert de begrijpelijkheid voor zoekmachines en AI-antwoorddiensten (SEO, GEO en AEO), maar garandeert geen rangschikking, indexering, AI-vermelding of rich result. Er bestaat geen speciale code die een toppositie oplevert. FAQ-rich-results worden door Google doorgaans beperkt tot gezaghebbende gezondheids- en overheidssites; verwacht die niet voor deze website. De relatie tussen DeTakelaar.nl en de KvK-inschrijving is nog niet vastgesteld; daarom is geen juridische bedrijfsnaam of KvK-nummer gepubliceerd.
 
 ## Update van de bestaande TransIP-site
 
@@ -36,7 +36,7 @@ Verwijder na lokaal veiligstellen oude openbare kopieën zoals index-oud.html en
 
 ## Nog benodigde bedrijfsinformatie
 
-Bevestig de vestigingsplaats, eventuele openbare bedrijfsadresgegevens, KvK-nummer, werkende zakelijke mailbox en feitelijke beschikbaarheid. Voeg deze zichtbaar en consequent toe voordat overeenkomstige structured data wordt uitgebreid. Ga geen 24/7-, vergunning- of verzekeringsclaims toevoegen zonder onderbouwing.
+Bevestig de juridische relatie met de KvK-inschrijving, de werkende zakelijke mailbox en feitelijke beschikbaarheid. Voeg deze zichtbaar en consequent toe voordat overeenkomstige structured data wordt uitgebreid. Ga geen 24/7-, vergunning- of verzekeringsclaims toevoegen zonder onderbouwing.
 
 ## Meten
 
