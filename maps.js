@@ -14,6 +14,6 @@ if (typeof document !== 'undefined') {
   for (const link of document.querySelectorAll('[data-map-address]')) {
     link.href = mapUrl(link.dataset.mapAddress, apple);
     const label = link.querySelector('[data-map-label]');
-    if (label) label.textContent = apple ? 'Open in Apple Kaarten' : 'Open in Google Maps';
+    if (label) label.textContent = apple ? 'Apple Kaarten' : 'Google Maps';
   }
 }
