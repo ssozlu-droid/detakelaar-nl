@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1100" viewBox="0 0 1440 1100" fill="none">
+<defs>
+ <radialGradient id="land"><stop stop-color="#26251b"/><stop offset="1" stop-color="#151916"/></radialGradient>
+ <linearGradient id="gold" x1="550" y1="760" x2="1110" y2="150" gradientUnits="userSpaceOnUse"><stop stop-color="#8c6936"/><stop offset=".5" stop-color="#e2c17c"/><stop offset="1" stop-color="#a78348"/></linearGradient>
+ <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
+ <pattern id="grid" width="70" height="70" patternUnits="userSpaceOnUse"><path d="M70 0H0V70" stroke="#cba664" stroke-opacity=".035"/></pattern>
+ <g id="roads" stroke-linejoin="round" stroke-linecap="round">
+ <!-- A4: Amsterdam, Leiden, Den Haag, Rotterdam -->
+ <path d="M780 398L755 431 720 462 694 489 687 515 714 543 746 567 746 609 766 648"/>
+ <!-- A12: Den Haag, Gouda, Utrecht, Arnhem -->
+ <path d="M687 515L735 516 781 528 824 513 863 503 925 511 973 530 1020 542 1090 537"/>
+ <!-- A2: Amsterdam, Utrecht, Den Bosch, Eindhoven, Maastricht -->
+ <path d="M780 398L800 435 835 473 863 503 863 551 847 599 866 641 887 683 920 727 942 782 948 846 978 907 981 972"/>
+ <!-- A1: Amsterdam, Amersfoort, Apeldoorn, Hengelo -->
+ <path d="M780 398L837 417 885 446 945 451 999 438 1069 447 1151 457 1203 447"/>
+ <!-- A28: Utrecht, Amersfoort, Zwolle, Groningen -->
+ <path d="M863 503L885 446 938 405 992 360 1030 311 1080 248 1134 179 1174 126"/>
+ <!-- A27: Almere, Utrecht, Breda -->
+ <path d="M882 362L885 404 864 450 863 503 842 548 815 587 811 632 796 678"/>
+ <!-- A16: Rotterdam, Breda, Belgium -->
+ <path d="M714 543L741 575 767 612 789 639 796 678 813 719"/>
+ <!-- A20: Westland, Rotterdam, Gouda -->
+ <path d="M652 554L688 550 714 543 746 537 781 528"/>
+ <!-- A13: Den Haag to Rotterdam -->
+ <path d="M687 515L697 526 714 543"/>
+ <!-- A7: Noord-Holland, Afsluitdijk, Friesland, Groningen -->
+ <path d="M780 398L766 340 788 275 837 228 897 201 966 201 1011 185 1092 169 1134 179 1174 126 1234 109"/>
+ <!-- A9: Alkmaar, Haarlem, Amsterdam -->
+ <path d="M742 290L725 342 733 384 755 410 800 435"/>
+ <!-- A6: Almere, Lelystad, Joure -->
+ <path d="M837 417L882 362 917 319 951 270 966 201"/>
+ <!-- A50: Zwolle, Arnhem, Nijmegen, Eindhoven -->
+ <path d="M992 360L999 438 1002 486 1020 542 996 581 986 630 952 673 920 727"/>
+ <!-- A58: Zeeland, Breda, Tilburg, Eindhoven -->
+ <path d="M570 704L620 697 683 691 742 698 796 678 841 704 880 712 920 727"/>
+ <!-- A15: Rotterdam, Gorinchem, Nijmegen -->
+ <path d="M649 592L712 585 767 612 815 587 866 594 934 586 996 581"/>
+ <!-- A59 and A67 -->
+ <path d="M742 698L791 651 847 644 866 641M858 749L920 727 975 731 1055 778"/>
+ </g>
+</defs>
+<path fill="url(#grid)" d="M0 0h1440v1100H0z"/>
+<!-- A decorative, simplified outline of the Netherlands. -->
+<path d="M710 205L727 189 741 216 752 248 772 265 807 249 837 223 876 200 901 175 953 157 987 137 1026 125 1070 98 1112 88 1150 72 1194 75 1231 63 1264 83 1256 135 1240 180 1252 219 1225 251 1233 284 1207 310 1227 348 1204 385 1230 424 1215 462 1182 483 1151 511 1111 527 1101 568 1075 583 1060 625 1026 642 1048 674 1065 716 1040 749 1061 779 1037 815 1005 854 1005 895 1023 922 1005 945 1009 978 979 1013 954 992 953 956 929 928 931 888 906 844 888 806 853 778 817 772 783 742 741 742 710 721 673 735 636 725 603 743 566 731 540 708 555 682 598 671 615 648 653 638 646 617 619 604 634 578 652 551 675 522 680 490 700 457 716 420 719 382 707 351 713 316 704 283 711 247Z" fill="url(#land)" stroke="#8e7848" stroke-opacity=".25" stroke-width="1.2"/>
+<!-- IJsselmeer -->
+<path d="M792 277L823 262 847 249 872 238 900 229 912 250 894 281 874 307 873 337 849 359 827 347 812 320Z" fill="#101715" stroke="#9a8553" stroke-opacity=".18"/>
+<!-- Zeeland waterways and rivers -->
+<g stroke="#a38b57" stroke-opacity=".14" stroke-width="2"><path d="M548 699L612 692 665 706 704 699M567 674L612 681 651 674 677 656M651 601L710 603 754 627 812 617 854 604 928 610 987 603M784 537L830 531 877 546 925 558 980 552 1035 568"/></g>
+<!-- Subordinate roads, kept deliberately quiet -->
+<g stroke="#b39359" stroke-opacity=".15" stroke-width="1"><path d="M742 290L788 275 837 228M725 342L766 340 812 320M733 384L780 398 827 347 882 362 938 405M694 489L755 476 800 435M735 516L755 476 835 473M781 528L815 587M741 575L781 565 842 548M796 678L866 641 934 655 986 630M880 712L887 683 952 673M942 782L975 731M978 907L1005 854M1080 248L1141 276 1207 310M1030 311L1108 344 1204 385M1069 447L1108 344 1151 457M1092 169L1105 121 1150 72M951 270L1030 311M897 201L924 174 953 157"/></g>
+<use href="#roads" stroke="#cda75f" stroke-width="9" opacity=".14" filter="url(#glow)"/>
+<use href="#roads" stroke="#493e27" stroke-width="4"/>
+<use href="#roads" stroke="url(#gold)" stroke-width="1.6" opacity=".88"/>
+<!-- Highlight the A4 and A12 corridor. -->
+<path d="M780 398L755 431 720 462 694 489 687 515 714 543M687 515L735 516 781 528 824 513 863 503 925 511 973 530 1020 542" stroke="#e6c886" stroke-width="2.8" stroke-linejoin="round"/>
+<g fill="#d9b978" stroke="#171b16" stroke-width="3"><circle cx="780" cy="398" r="5"/><circle cx="687" cy="515" r="5"/><circle cx="714" cy="543" r="5"/><circle cx="781" cy="528" r="5"/><circle cx="863" cy="503" r="5"/><circle cx="1020" cy="542" r="4"/><circle cx="1174" cy="126" r="4"/><circle cx="920" cy="727" r="4"/></g>
+<!-- Gold route shields, no distracting traffic colours. -->
+<g font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#e8ce95" stroke="#ad8c4f" stroke-opacity=".65">
+<g transform="translate(710 458)"><rect width="37" height="24" rx="5" fill="#24251a"/><text x="18.5" y="16" stroke="none">A4</text></g>
+<g transform="translate(741 494)"><rect width="42" height="24" rx="5" fill="#24251a"/><text x="21" y="16" stroke="none">A12</text></g>
+<g transform="translate(916 495)"><rect width="42" height="24" rx="5" fill="#24251a"/><text x="21" y="16" stroke="none">A12</text></g>
+<g transform="translate(852 602)"><rect width="37" height="24" rx="5" fill="#24251a"/><text x="18.5" y="16" stroke="none">A2</text></g>
+<g transform="translate(930 426)"><rect width="37" height="24" rx="5" fill="#24251a"/><text x="18.5" y="16" stroke="none">A1</text></g>
+<g transform="translate(1024 299)"><rect width="42" height="24" rx="5" fill="#24251a"/><text x="21" y="16" stroke="none">A28</text></g>
+<g transform="translate(954 183)"><rect width="37" height="24" rx="5" fill="#24251a"/><text x="18.5" y="16" stroke="none">A7</text></g>
+<g transform="translate(777 638)"><rect width="42" height="24" rx="5" fill="#24251a"/><text x="21" y="16" stroke="none">A16</text></g>
+<g transform="translate(990 474)"><rect width="42" height="24" rx="5" fill="#24251a"/><text x="21" y="16" stroke="none">A50</text></g>
+<g transform="translate(830 689)"><rect width="42" height="24" rx="5" fill="#24251a"/><text x="21" y="16" stroke="none">A58</text></g>
+</g>
+<g font-family="Arial,Helvetica,sans-serif" font-size="10" letter-spacing="2" fill="#b9ac8b" opacity=".65"><text x="793" y="387">AMSTERDAM</text><text x="596" y="504">DEN HAAG</text><text x="636" y="566">ROTTERDAM</text><text x="758" y="552">GOUDA</text><text x="689" y="509" font-size="8">RIJSWIJK</text><text x="876" y="493">UTRECHT</text><text x="1035" y="560">ARNHEM</text><text x="1185" y="118">GRONINGEN</text><text x="934" y="752">EINDHOVEN</text></g>
+</svg>
