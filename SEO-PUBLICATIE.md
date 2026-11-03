@@ -14,6 +14,7 @@ Dit verbetert de begrijpelijkheid voor zoekmachines en AI-antwoorddiensten (SEO,
 
 Maak eerst een lokale kopie van de huidige bestanden die je vervangt. Upload daarna vanuit de GitHub-ZIP de volgende bestanden direct naar /www:
 
+- maps.js (nieuw; kaartlinks voor iPhone/iPad, Android en desktop)
 - index.html en styles.css (vervangen; controleer dat er geen index(1).html ontstaat)
 - privacy.html (vervangen)
 - autotransport.html, pechhulp-schadevervoer.html, zorgvuldig-autovervoer.html (nieuw)
