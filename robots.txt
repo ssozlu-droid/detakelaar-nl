@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /nieuw/
+Disallow: /index-oud.html
+
+Sitemap: https://detakelaar.nl/sitemap.xml
