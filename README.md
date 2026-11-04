@@ -38,3 +38,32 @@ Tests: `npm test` (Node 24). Backendtests: `php tests/live-data.test.php`. De te
 ## Architectuur
 
 vehicle.js bevat normalisatie, de RDW-provider en berichtopmaak. app.js beheert de interface met textContent voor externe voertuiggegevens. Een toekomstige Finnik-koppeling hoort achter een serveradapter zodra toegang en voorwaarden bekend zijn; plaats nooit privésleutels in frontendbestanden. De toegestane maximummassa van de oprijwagen is niet de laadcapaciteit. Voertuiggeschiktheid wordt persoonlijk beoordeeld.
+
+## Geselecteerde Nederlandse adressen
+
+Ophalen en afleveren gebruiken de officiële PDOK Locatieserver 3.1 (`suggest`
+en `lookup`). Een suggestie wordt pas bevestigd wanneer de lookup exact hetzelfde
+adres-ID teruggeeft, met type `adres`, bron `BAG`, een nummeraanduiding-ID,
+straatnaam, huisnummer en woonplaats. WhatsApp gebruikt uitsluitend de bevestigde
+weergavenaam. Wijzigingen aan een geselecteerd veld wissen de bevestiging en het
+oude bericht. Bij een storing of ongeldige invoer wordt geen aanvraag geopend;
+voor locaties zonder straatadres is er een belmogelijkheid. Een Google-API-sleutel
+of extra PHP-endpoint is niet nodig. De zoektekst gaat rechtstreeks naar PDOK;
+naam en telefoonnummer worden daarbij niet gedeeld.
+
+Upload hiervoor `index.html`, `app.js`, de nieuwe `addresses.js`, `styles.css` en
+`privacy.html` naar `/www`. Laat `.htaccess` intact. Upload `addresses.js` tegelijk
+met `app.js`: zolang de adresmodule niet laadt, blijft de verzendknop veilig uit en blijft de bestaande RDW-check werken.
+`npm test` bevat de adresdatatests; `python3 tests/addresses-browser.py` test de
+volledige formulierblokkade en selectie op 320/390/1440 px met gesimuleerde
+PDOK-antwoorden. De echte cloud-aanvraag naar PDOK wordt nog door de netwerkpolicy
+geblokkeerd; officiële documentatie staat op
+https://github.com/PDOK/locatieserver/wiki/API-Locatieserver . Een actuele echte
+suggest/lookup vanuit de uiteindelijke website is een afzonderlijke livecontrole.
+
+Op 4 november 2026 leverde de eigenaar een echte PDOK-suggest-response aan met
+`type: adres`, `Kampenringweg 17, 2803PE Gouda` en ID
+`adr-de7289f4679abe01ddbef4314dacca91`. De suggest-bron is daarmee vanuit diens
+browser bereikbaar bevestigd. De volledige suggest/lookup/WhatsApp-flow is
+lokaal met expliciete fixtures gecontroleerd; een echte lookup en selectie op de
+gepubliceerde website moeten na het uploaden nog worden doorlopen.

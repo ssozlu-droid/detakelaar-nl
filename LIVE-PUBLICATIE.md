@@ -103,3 +103,15 @@ credentialwaarden of ruwe broninhoud:
 
 Ook een kort gecachte storing behoudt zijn foutcode. De gewone website toont
 bezoekers alleen de rustige niet-beschikbaarmelding.
+
+## Aanvullende broncontrole op TransIP
+
+Op 4 november 2026 leverde de eigenaar het resultaat van `/api/traffic.php` aan:
+`status: ok`, NDW-publicatie `2026-11-04T02:33:00Z`, controle
+`2026-11-04T02:33:36Z`, vervaltijd `2026-11-04T02:38:00Z`, `jams: []` en
+`unmappedReports: 0`. Dit bevestigt een actuele succesvolle NDW-endpointreactie
+op TransIP op dat moment. Een niet-lege echte filepublicatie is nog niet
+vastgelegd; de weergave daarvan is met gesimuleerde gegevens getest.
+De nieuwsfeed gaf daar `SOURCE_HTTP_404`; verder werk aan nieuws is op verzoek
+van de eigenaar gepauzeerd. De browserwaarschuwing over XSLT staat los van de
+serverkoppeling.

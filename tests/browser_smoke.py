@@ -16,6 +16,13 @@ try:
    errors=[]
    page.on('pageerror',lambda error:errors.append(str(error)))
    page.route('https://opendata.rdw.nl/**',lambda route:route.fulfill(status=200,content_type='application/json',body=json.dumps([{'kenteken':'AB12CD','merk':'TESTMERK','handelsbenaming':'Testmodel','datum_eerste_toelating':'20200102','massa_ledig_voertuig':'1100'}])))
+   addresses=[{'id':'adr-'+'a'*32,'type':'adres','bron':'BAG','nummeraanduiding_id':'0344200000128086','huisnummer':93,'straatnaam':'Europalaan','woonplaatsnaam':'Utrecht','weergavenaam':'Europalaan 93, 3526KP Utrecht'},{'id':'adr-'+'b'*32,'type':'adres','bron':'BAG','nummeraanduiding_id':'0344200000128087','huisnummer':95,'straatnaam':'Europalaan','woonplaatsnaam':'Utrecht','weergavenaam':'Europalaan 95, 3526KP Utrecht'}]
+   def pdok(route):
+    from urllib.parse import urlparse,parse_qs
+    u=urlparse(route.request.url);params=parse_qs(u.query)
+    docs=[d for d in addresses if d['id']==params.get('id',[''])[0]] if u.path.endswith('/lookup') else addresses
+    route.fulfill(content_type='application/json',body=json.dumps({'response':{'docs':docs}}))
+   page.route('https://api.pdok.nl/**',pdok)
    page.goto('http://127.0.0.1:8000/')
    assert page.locator('[data-contact="tel"]').get_attribute('href')=='tel:+31682990303'
    assert page.locator('[data-contact="whatsapp"]').get_attribute('href')=='https://wa.me/31682990303'
@@ -26,8 +33,12 @@ try:
    page.wait_for_function("document.getElementById('vehicle').value === 'TESTMERK Testmodel'")
    assert 'Niet beschikbaar' in page.locator('#vehicle-result').inner_text()
    assert page.locator('#request-plate').input_value()=='AB12CD'
-   page.locator('#pickup').fill('Den Haag & Leiden')
-   page.locator('#delivery').fill('Utrecht')
+   page.locator('#pickup').fill('Europalaan 93')
+   page.locator('#pickup-options [role=option]').first.click()
+   page.wait_for_function("document.getElementById('pickup').value === 'Europalaan 93, 3526KP Utrecht'")
+   page.locator('#delivery').fill('Europalaan 95')
+   page.locator('#delivery-options [role=option]').nth(1).click()
+   page.wait_for_function("document.getElementById('delivery').value === 'Europalaan 95, 3526KP Utrecht'")
    page.locator('#name').fill('Test klant')
    page.locator('#phone').fill('0612345678')
    page.locator('#type').select_option(label='Schadevervoer')
@@ -37,7 +48,7 @@ try:
    page.wait_for_function('window.openedLinks.length > 0')
    link=page.locator('#generated-whatsapp-link').get_attribute('href')
    assert link.startswith('https://wa.me/31682990303?text=')
-   assert 'Den Haag & Leiden' in page.locator('#message-text').input_value()
+   assert 'Europalaan 93, 3526KP Utrecht' in page.locator('#message-text').input_value()
    page.locator('#plate').fill('xy-99-zz')
    assert page.locator('#vehicle').input_value()==''
    page.unroute('https://opendata.rdw.nl/**')
@@ -51,7 +62,7 @@ try:
    assert not errors,errors
    page.goto('http://127.0.0.1:8000/')
    page.screenshot(path=f'/tmp/detakelaar-{width}.png',full_page=True)
-   print(f'PASS: {width}px — layout, contact links, RDW success/empty/network failure, stale data, WhatsApp payload')
+   print(f'PASS: {width}px — layout, contact links, RDW success/empty/network failure, stale data, verified-address WhatsApp payload')
    page.close()
   page=browser.new_page(viewport={'width':1200,'height':630})
   page.goto('http://127.0.0.1:8000/assets/og.svg')

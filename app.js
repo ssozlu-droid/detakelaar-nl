@@ -44,8 +44,17 @@ $('lookup-form').addEventListener('submit', async event => {
   status.dataset.error='true';status.textContent=error.name==='AbortError' ? 'Het zoeken is onderbroken of duurt te lang. Probeer opnieuw of vul je aanvraag handmatig in.' : error instanceof TypeError ? 'Geen verbinding met de RDW. Controleer je internetverbinding of vul je aanvraag handmatig in.' : error.message;
  } finally {clearTimeout(timer);if(currentController===controller){button.disabled=false;button.textContent='Zoek voertuig';$('lookup-form').removeAttribute('aria-busy');}}
 });
+let addresses = null;
+import('./addresses.js').then(({initAddressFields}) => {
+ addresses = initAddressFields([$('pickup'),$('delivery')], () => {
+  $('message-text').value='';$('message-fallback').hidden=true;$('request-status').textContent='';
+ });
+ $('send-button').disabled=false;
+}).catch(() => {
+ $('request-status').textContent='Adrescontrole kan niet worden geladen. Vernieuw de pagina of bel ons voor je aanvraag.';
+});
 $('request-form').addEventListener('submit', async event => {
- event.preventDefault();const data=Object.fromEntries(new FormData(event.currentTarget));
+ event.preventDefault();if(!addresses){$('request-status').textContent='Adrescontrole is nog niet beschikbaar. Bel ons voor je aanvraag.';return;}const verified=addresses.values();if(!verified){$('request-status').textContent='Selecteer voor ophalen en afleveren een bestaand adres met huisnummer.';return;}const data={...Object.fromEntries(new FormData(event.currentTarget)),...verified};
  for(const key of ['pickup','delivery','name','phone','type']) {if(!String(data[key]||'').trim()){$('request-status').textContent='Vul alle verplichte velden in.';return;}}
  const message=buildMessage(data);$('message-text').value=message;$('message-fallback').hidden=false;
  if(whatsappReady){const a=document.createElement('a');a.href=`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(message)}`;a.target='_blank';a.rel='noopener noreferrer';a.click();$('request-status').textContent='Je aanvraag staat klaar in WhatsApp. Verstuur daar zelf het bericht. Opent WhatsApp niet? Kopieer de tekst hieronder.';}
