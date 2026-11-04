@@ -36,7 +36,7 @@ if (scene) {
   const loader = new IntersectionObserver(([entry]) => {
     if (!entry.isIntersecting) return;
     loader.disconnect();
-    Promise.all(['assets/transport-empty.png', 'assets/transport-illustration.png'].map(preload))
+    Promise.all(['assets/transport-empty.png', 'assets/transport-illustration.png', 'assets/road-asphalt.png'].map(preload))
       .then(() => {
         motion.querySelectorAll('image[data-href]').forEach(image => {
           image.setAttribute('href', image.dataset.href);
