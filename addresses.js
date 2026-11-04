@@ -40,7 +40,7 @@ export function initAddressFields(inputs, onChange = () => {}) {
     input.setAttribute('role','combobox'); input.setAttribute('aria-autocomplete','list');
     input.setAttribute('aria-expanded','false'); input.setAttribute('aria-controls',list.id);
     input.setAttribute('aria-describedby',status.id); input.setAttribute('spellcheck','false');
-    let selected = null, candidates = [], active = -1, version = 0, timer, controller, choosing = false;
+    let selected = null, candidates = [], active = -1, version = 0, timer, controller, choosing = false, touchChoice = null, blurPending = false, suppressClickUntil = 0;
     const validityMessage = 'Kies een bestaand adres met huisnummer uit de suggesties.';
     input.setCustomValidity(validityMessage);
     const close = () => { list.hidden = true; input.setAttribute('aria-expanded','false'); input.removeAttribute('aria-activedescendant'); active = -1; };
@@ -70,6 +70,17 @@ export function initAddressFields(inputs, onChange = () => {}) {
         say(error.message.startsWith('Dit is geen') || error.message.startsWith('Kies opnieuw') ? error.message : 'Adres controleren lukt niet. Probeer opnieuw of bel ons.','error');
       } finally { clearTimeout(timeout); if (version === requestVersion) { choosing = false; input.removeAttribute('aria-busy'); } }
     };
+    const finishBlur = () => {
+      blurPending = false;
+      if (!choosing) { cancel(); version++; }
+      close();
+    };
+    const cancelTouch = () => {
+      touchChoice = null;
+      suppressClickUntil = performance.now()+700;
+      if (blurPending && document.activeElement !== input) finishBlur();
+      else blurPending = false;
+    };
     const search = async (query, requestVersion) => {
       if (version !== requestVersion || input.value.trim() !== query) return;
       controller = new AbortController(); const current = controller;
@@ -82,8 +93,36 @@ export function initAddressFields(inputs, onChange = () => {}) {
         candidates.forEach((candidate,index) => {
           const option = document.createElement('li'); option.id = `${input.id}-option-${index}`;
           option.setAttribute('role','option'); option.setAttribute('aria-selected','false'); option.textContent = candidate.label;
-          option.addEventListener('pointerdown',event=>event.preventDefault());
-          option.addEventListener('click',()=>choose(index)); list.append(option);
+          // iOS can blur the input before a synthetic click, or suppress that click.
+          // Confirm on touchend instead; keep ordinary scrolling free to cancel a tap.
+          option.addEventListener('pointerdown',event=>{
+            if (event.pointerType !== 'touch') event.preventDefault();
+            else if (event.pointerType === 'touch') touchChoice={index,x:event.clientX,y:event.clientY,moved:false};
+          });
+          option.addEventListener('mousedown',event=>event.preventDefault());
+          option.addEventListener('touchstart',event=>{
+            const touch=event.touches[0];
+            touchChoice=touch?{index,x:touch.clientX,y:touch.clientY,moved:event.touches.length!==1}:null;
+            suppressClickUntil=performance.now()+700;
+          },{passive:true});
+          option.addEventListener('touchmove',event=>{
+            const touch=event.touches[0];
+            if(touchChoice && (!touch || event.touches.length!==1 || Math.hypot(touch.clientX-touchChoice.x,touch.clientY-touchChoice.y)>10)) touchChoice.moved=true;
+          },{passive:true});
+          option.addEventListener('touchcancel',cancelTouch,{passive:true});
+          option.addEventListener('pointercancel',cancelTouch);
+          option.addEventListener('touchend',event=>{
+            const gesture=touchChoice, touch=event.changedTouches[0];
+            if(!gesture || gesture.index!==index || gesture.moved || !touch || event.touches.length){cancelTouch();return;}
+            event.preventDefault();
+            touchChoice=null;blurPending=false;suppressClickUntil=performance.now()+700;
+            choose(index);
+          },{passive:false});
+          option.addEventListener('click',event=>{
+            event.preventDefault();
+            if(performance.now()>=suppressClickUntil) choose(index);
+          });
+          list.append(option);
         });
         list.hidden = !candidates.length; input.setAttribute('aria-expanded',String(candidates.length>0));
         say(candidates.length ? `${candidates.length} adressen gevonden. Kies het juiste adres.` : 'Geen volledig adres gevonden. Voeg huisnummer, plaats of postcode toe.');
@@ -93,7 +132,7 @@ export function initAddressFields(inputs, onChange = () => {}) {
       } finally { clearTimeout(timeout); if (version === requestVersion) input.removeAttribute('aria-busy'); }
     };
     const schedule = () => {
-      cancel(); choosing = false; const requestVersion = ++version;
+      cancel(); choosing = false; touchChoice=null;blurPending=false;const requestVersion = ++version;
       selected = null; candidates = []; close(); list.replaceChildren();
       input.setCustomValidity(validityMessage); onChange();
       const query = input.value.trim();
@@ -101,10 +140,10 @@ export function initAddressFields(inputs, onChange = () => {}) {
       timer = setTimeout(()=>search(query,requestVersion),300);
     };
     input.addEventListener('input',schedule);
-    input.addEventListener('focus',()=>{ if (!selected && !choosing && input.value.trim().length >= 3) schedule(); });
-    input.addEventListener('blur',()=>{ if (!choosing) { cancel(); version++; } close(); });
+    input.addEventListener('focus',()=>{ if (!selected && !choosing && !touchChoice && input.value.trim().length >= 3) schedule(); });
+    input.addEventListener('blur',()=>{ if(touchChoice){blurPending=true;return;}finishBlur(); });
     input.addEventListener('keydown',event=>{
-      if (event.key==='Escape') { cancel(); choosing = false; version++; close(); say(validityMessage); return; }
+      if (event.key==='Escape') { cancel(); choosing = false; touchChoice=null;blurPending=false;version++;close();say(validityMessage);return; }
       if (list.hidden || !candidates.length) return;
       if (event.key==='ArrowDown' || event.key==='ArrowUp') {
         event.preventDefault(); const step=event.key==='ArrowDown'?1:-1;

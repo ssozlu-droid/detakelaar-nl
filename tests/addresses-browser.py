@@ -93,7 +93,7 @@ try:
   page=b.new_page(java_script_enabled=False);page.goto('http://127.0.0.1:8002/')
   assert page.locator('#send-button').is_disabled();print('PASS no JavaScript: send stays disabled')
   page=b.new_page()
-  page.route('**/addresses.js',lambda r:r.abort())
+  page.route('**/addresses.js*',lambda r:r.abort())
   page.route('https://opendata.rdw.nl/**',lambda r:r.fulfill(content_type='application/json',body=json.dumps([{'kenteken':'AB12CD','merk':'TESTMERK','handelsbenaming':'Testmodel'}])))
   page.goto('http://127.0.0.1:8002/')
   page.wait_for_function("document.getElementById('request-status').textContent.includes('Adrescontrole kan niet')")

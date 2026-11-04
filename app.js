@@ -60,7 +60,7 @@ dateInput.addEventListener('focus',refreshDateMinimum);
 dateInput.addEventListener('input',()=>{dateInput.setCustomValidity('');$('message-text').value='';$('message-fallback').hidden=true;$('request-status').textContent='';});
 updateTiming();
 let addresses = null;
-import('./addresses.js').then(({initAddressFields}) => {
+import('./addresses.js?v=20261104-touch').then(({initAddressFields}) => {
  addresses = initAddressFields([$('pickup'),$('delivery')], () => {
   $('message-text').value='';$('message-fallback').hidden=true;$('request-status').textContent='';
  });

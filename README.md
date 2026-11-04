@@ -78,3 +78,15 @@ kalenderdatum gewist en uit het formulier gehaald. De voorkeur gaat als
 `Gewenste planning` mee in het WhatsApp-bericht; beschikbaarheid en planning
 blijven persoonlijk te bevestigen. Upload bij deze wijziging `index.html`,
 `app.js` en `vehicle.js` samen naar `/www`.
+
+## Adresselectie met aanraken
+
+Tikselectie gebruikt `touchend`, met behoud van de kandidaat als de invoer eerder
+focus verliest. Een gewone klik blijft beschikbaar voor muis/toetsenbord.
+Scrollen of annuleren selecteert geen adres; de vertraagde synthetische klik
+na een tik veroorzaakt geen tweede lookup. De BAG-lookup en de blokkade op vrije
+invoer blijven vereist. `python3 tests/addresses-touch.py` test aanraking,
+blur/herindeling vóór selectie, het ontbreken van een click-event, scrollen en
+WhatsApp-output met gesimuleerde bronantwoorden. Dit is Chromium-touchsimulatie,
+geen test op een fysieke iPhone 8. Voor deze fix upload je `index.html`, `app.js`
+en `addresses.js` samen; de versieparameters vragen de nieuwe scripts op.
