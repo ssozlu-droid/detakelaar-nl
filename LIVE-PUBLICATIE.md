@@ -86,3 +86,20 @@ HTTP 403. Daarom zijn echte NDW-meldingen, de actuele RSS-inhoud en werking op
 TransIP **nog niet bevestigd**. De cloudconfiguratie bevat een opgeslagen concept
 met de benodigde domeinen; review, opslaan en publiceren daarvan zijn nog nodig
 om de cloud-broncontrole af te ronden. Dit is iets anders dan publiceren op TransIP.
+
+## Veilige foutcodes bij diagnose
+
+De PHP-endpoints geven bij een storing ook een `code`, zonder serverpaden,
+credentialwaarden of ruwe broninhoud:
+
+- `PHP_CURL_MISSING` / `PHP_XML_MISSING`: vereiste PHP-module ontbreekt.
+- `SOURCE_HTTP_403` / `SOURCE_HTTP_404` / `SOURCE_HTTP_301` enz.: de bron antwoordt
+  met deze HTTP-status; onderzoek dat antwoord voordat de bron-URL wordt gewijzigd.
+- `SOURCE_CONNECTION_FAILED`, `SOURCE_TIMEOUT` of `SOURCE_TLS_FAILED`: de
+  uitgaande HTTPS-verbinding is niet bruikbaar. TLS-controle niet uitschakelen.
+- `SOURCE_NOT_RSS` / `SOURCE_DATA_INVALID` / `SOURCE_FORMAT_INVALID`: het antwoord
+  is geen bruikbare feed of bevat ongeldige gegevens.
+- `CACHE_UNAVAILABLE`: de tijdelijke cachemap is niet schrijfbaar.
+
+Ook een kort gecachte storing behoudt zijn foutcode. De gewone website toont
+bezoekers alleen de rustige niet-beschikbaarmelding.

@@ -54,4 +54,6 @@ check($calls===1,'Fresh cache must avoid duplicate upstream requests');
 rejects(fn()=>dt_cached($cacheKind,$now+700,fn()=>throw new RuntimeException('offline')),'Expired cache must not be returned on failure');
 $dir=sys_get_temp_dir().'/detakelaar-live-'.substr(hash('sha256',realpath(__DIR__.'/../api')),0,16);
 @unlink($dir.'/'.$cacheKind.'.json');@unlink($dir.'/'.$cacheKind.'.lock');
+check(dt_failure_reason(new DtFeedFailure('SOURCE_HTTP_403'))==='SOURCE_HTTP_403','HTTP reason remains diagnosable');
+check(dt_failure_reason(new RuntimeException('private server information'))==='SOURCE_DATA_INVALID','Internal details must not leak');
 echo "PASS $count backend checks: geography, timestamps, active validity, XML safety, RSS recency and cache failure.\n";

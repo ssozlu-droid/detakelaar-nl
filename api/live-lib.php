@@ -7,6 +7,23 @@ const DT_NEWS_URL = 'https://www.nu.nl/rss/Auto';
 const DT_TRAFFIC_MAX_AGE = 300;
 const DT_NEWS_MAX_AGE = 259200; // Only headlines published in the last 72 hours.
 
+final class DtFeedFailure extends RuntimeException {
+    public string $reason;
+    public function __construct(string $reason) { parent::__construct($reason); $this->reason = $reason; }
+}
+function dt_failure_reason(Throwable $error): string {
+    if ($error instanceof DtFeedFailure) return $error->reason;
+    return match ($error->getMessage()) {
+        'PHP cURL required' => 'PHP_CURL_MISSING',
+        'Cache unavailable', 'Cache lock unavailable', 'Could not write cache', 'Invalid cache directory' => 'CACHE_UNAVAILABLE',
+        'Refresh in progress' => 'REFRESH_IN_PROGRESS',
+        'Traffic publication timestamp missing or stale' => 'SOURCE_TIMESTAMP_INVALID',
+        'Not an RSS feed' => 'SOURCE_NOT_RSS',
+        'Invalid compressed feed', 'Invalid feed size', 'Too many records', 'Too many mapped jams' => 'SOURCE_FORMAT_INVALID',
+        default => 'SOURCE_DATA_INVALID',
+    };
+}
+
 function dt_date(?string $value): ?int {
     if (!$value) return null;
     $iso = '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/';
@@ -148,7 +165,19 @@ function dt_fetch(string $url): string {
             $body .= $chunk; return strlen($chunk);
         }]);
     try {
-        if (curl_exec($curl) === false || curl_getinfo($curl, CURLINFO_HTTP_CODE) !== 200) throw new RuntimeException('Feed request failed');
+        $result = curl_exec($curl);
+        $status = (int)curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        if ($result === false) {
+            $reason = match (curl_errno($curl)) {
+                CURLE_OPERATION_TIMEDOUT => 'SOURCE_TIMEOUT',
+                CURLE_PEER_FAILED_VERIFICATION, CURLE_SSL_CONNECT_ERROR => 'SOURCE_TLS_FAILED',
+                CURLE_WRITE_ERROR => 'SOURCE_TOO_LARGE',
+                default => 'SOURCE_CONNECTION_FAILED',
+            };
+            // Proxy denials may produce a connect failure before an HTTP origin response.
+            throw new DtFeedFailure($reason);
+        }
+        if ($status !== 200) throw new DtFeedFailure('SOURCE_HTTP_'.($status >= 100 && $status <= 599 ? $status : 'UNKNOWN'));
     } finally { curl_close($curl); }
     if (substr($body,0,2) === "\x1f\x8b") {
         $body = @gzdecode($body, 33554433);
@@ -162,7 +191,7 @@ function dt_cached(string $kind, int $now, callable $load): array {
     $directory = sys_get_temp_dir().'/detakelaar-live-'.substr(hash('sha256', __DIR__),0,16);
     if (!is_dir($directory) && !@mkdir($directory,0700,true) && !is_dir($directory)) throw new RuntimeException('Cache unavailable');
     if (is_link($directory)) throw new RuntimeException('Invalid cache directory');
-    $file = $directory.'/'.$kind.'.json'; $lock = fopen($directory.'/'.$kind.'.lock','c');
+    $file = $directory.'/'.$kind.'.json'; $lock = @fopen($directory.'/'.$kind.'.lock','c');
     if (!$lock) throw new RuntimeException('Cache lock unavailable');
     try {
         // Do not queue visitors behind a slow upstream request.
@@ -173,19 +202,22 @@ function dt_cached(string $kind, int $now, callable $load): array {
         }
         $cached = is_file($file) ? json_decode((string)file_get_contents($file),true) : null;
         if ($cached && ($cached['refreshAfter'] ?? 0)>$now && (dt_date($cached['data']['expiresAt'] ?? '') ?? 0)>$now) return $cached['data'];
-        if ($cached && ($cached['retryAfter'] ?? 0)>$now) throw new RuntimeException('Feed temporarily unavailable');
+        if ($cached && ($cached['retryAfter'] ?? 0)>$now) {
+            $reason = $cached['reason'] ?? 'SOURCE_CONNECTION_FAILED';
+            throw new DtFeedFailure(preg_match('/^[A-Z_0-9]{1,64}$/', $reason) ? $reason : 'SOURCE_CONNECTION_FAILED');
+        }
         try {
             $data = $load(); $result = ['refreshAfter'=>$now+$ttl,'data'=>$data];
         } catch (Throwable $error) {
             // Brief negative cache limits upstream load; old red segments are never returned.
-            $result = ['retryAfter'=>$now+30]; $data = null;
+            $result = ['retryAfter'=>$now+30, 'reason'=>dt_failure_reason($error)]; $data = null;
         }
-        $temp = tempnam($directory, 'feed-');
-        if (!$temp || file_put_contents($temp,json_encode($result,JSON_THROW_ON_ERROR)) === false || !rename($temp,$file)) {
+        $temp = @tempnam($directory, 'feed-');
+        if (!$temp || @file_put_contents($temp,json_encode($result,JSON_THROW_ON_ERROR)) === false || !rename($temp,$file)) {
             if ($temp && is_file($temp)) unlink($temp);
             throw new RuntimeException('Could not write cache');
         }
-        if ($data === null) throw new RuntimeException('Feed temporarily unavailable');
+        if ($data === null) throw new DtFeedFailure($result['reason']);
         return $data;
     } finally { flock($lock,LOCK_UN); fclose($lock); }
 }
@@ -193,12 +225,13 @@ function dt_respond(string $kind): void {
     header('Content-Type: application/json; charset=utf-8'); header('Cache-Control: no-store');
     header('X-Content-Type-Options: nosniff');
     try {
+        if (!class_exists('DOMDocument') || ($kind === 'traffic' && !class_exists('XMLReader'))) throw new DtFeedFailure('PHP_XML_MISSING');
         $now = time();
         $data = dt_cached($kind, $now, fn() => $kind === 'traffic'
             ? dt_parse_traffic(dt_fetch(DT_TRAFFIC_URL),$now) : dt_parse_news(dt_fetch(DT_NEWS_URL),$now));
         echo json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } catch (Throwable $error) {
         http_response_code(503);
-        echo json_encode(['status'=>'unavailable','message'=>$kind==='traffic' ? 'Verkeersinformatie tijdelijk niet beschikbaar.' : 'Nieuws tijdelijk niet beschikbaar.']);
+        echo json_encode(['status'=>'unavailable','code'=>dt_failure_reason($error),'message'=>$kind==='traffic' ? 'Verkeersinformatie tijdelijk niet beschikbaar.' : 'Nieuws tijdelijk niet beschikbaar.']);
     }
 }
