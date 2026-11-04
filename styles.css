@@ -39,3 +39,30 @@ body{isolation:isolate}.traffic-background{position:fixed;inset:0;z-index:-1;ove
 #hero-contact{gap:10px;align-items:center}#hero-contact .button,#hero-contact .social{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;border-radius:8px;white-space:nowrap}#hero-contact .button{padding:12px 18px;font-size:13px;line-height:1.3}#hero-contact .button.outline{background:#141816d9;border-color:#d8b57466}#hero-contact .button.outline:hover{background:#d8b57414;border-color:var(--gold)}#hero-contact .social{padding:11px 14px;border:1px solid #ffffff24;background:#14181699;font-size:12px;color:#d4d6ce}#hero-contact .social:hover{background:#d8b57412;border-color:#d8b57466;color:var(--gold)}#hero-contact .contact-icon{display:block;flex:0 0 22px;width:22px;height:22px;min-width:22px;max-width:22px;aspect-ratio:1;overflow:visible}#hero-contact .social .contact-icon{color:var(--gold)}.contact-label{display:block;white-space:nowrap;line-height:1.3}.lookup-card h2{letter-spacing:-.65px;line-height:1.22;word-spacing:normal}@media(max-width:650px){#hero-contact{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}#hero-contact .button{min-height:48px;padding:12px 14px;font-size:13px}#hero-contact .social{grid-column:1/-1;justify-self:start;min-height:36px;padding:7px 11px;gap:8px;font-size:11px;background:#14181699}#hero-contact .social .contact-icon{flex-basis:19px;width:19px;height:19px;min-width:19px;max-width:19px}.lookup-card h2{font-size:25px;letter-spacing:-.6px;line-height:1.24}}
 
 .google-profile{display:flex;align-items:center;gap:12px;margin:0 0 18px;font-size:13px;line-height:1.45}.google-profile-icon{display:block;flex:0 0 24px;width:24px;height:24px}.google-profile strong{display:block;font-weight:600;color:var(--text)}.google-profile-status{display:flex;align-items:center;gap:5px;margin-top:3px;font-size:12px;color:#92caa5}.google-profile-status svg{display:block;flex:0 0 14px;width:14px;height:14px}
+
+/* On phones, keep contact actions and the plate lookup in the first screen. */
+@media(max-width:650px){
+ .header{padding-block:10px}
+ .hero{gap:16px;padding:16px 0 28px}
+ .hero-copy{padding:0}
+ .hero-copy>.eyebrow,.hero-copy>.motto{display:none}
+ .hero #hero-title{font-size:clamp(25px,7.1vw,38px);line-height:1.12;letter-spacing:-1px;margin:0 0 9px}
+ .hero .lead{max-width:none;font-size:13px;line-height:1.55}
+ #hero-contact{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;gap:8px;margin-top:12px}
+ #hero-contact .button{min-height:44px;padding:10px 8px;font-size:13px;gap:8px}
+ #hero-contact .social{grid-column:auto;justify-self:stretch;min-height:44px;width:44px;padding:10px;gap:0}
+ #hero-contact .social .contact-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .hero .lookup-card{padding:18px}
+ .hero .lookup-card h2{font-size:22px;line-height:1.2;margin:10px 0 7px}
+ .hero .lookup-card>p{font-size:12px;line-height:1.5;margin:7px 0}
+ .hero .lookup-card label{margin-top:10px}
+ .hero .plate{height:54px}
+ .hero .plate input{font-size:26px}
+ .hero .nl{padding-top:6px}
+ .hero .lookup-card .hint{margin-bottom:12px}
+ .hero #lookup-button{min-height:44px}
+}
+@media(max-width:650px){
+ .hero .lookup-card .card-heading,.hero .lookup-card>p:not(#lookup-status){display:none}
+ .hero .lookup-card h2{margin-top:0}
+}
