@@ -1,6 +1,6 @@
 # DeTakelaar.nl
 
-Zelfstandige HTML/CSS/JavaScript-website. Geen build, database, API-sleutel of npm-installatie nodig. Telefoon en WhatsApp: 06 8299 0303, door eigenaar opgegeven. Contactinstellingen staan in config.js.
+HTML/CSS/JavaScript-website zonder build, database, API-sleutel of npm-installatie. De optionele actuele filemeldingen en autonieuwskoppen gebruiken de PHP-koppeling in `api/`: PHP 8+, cURL, DOM/XMLReader en zlib zijn daarvoor nodig. Zie LIVE-PUBLICATIE.md. Bij ontbrekende of onbruikbare brondata blijft de gouden kaart zichtbaar en verschijnt een nette niet-beschikbaarmelding. Telefoon en WhatsApp: 06 8299 0303, door eigenaar opgegeven. Contactinstellingen staan in config.js.
 
 ## Lokaal gebruiken
 
@@ -13,7 +13,9 @@ python3 -m http.server 8000 --bind 0.0.0.0
 
 Open de site via een lokale HTTP-server op je eigen computer. Open index.html niet rechtstreeks met file://: JavaScriptmodules kunnen dan worden geblokkeerd. In de cloud wordt localhost alleen intern getest.
 
-Tests: `npm test` (Node 24). Browsercontrole: `python3 tests/browser_smoke.py` vereist Python Playwright en Chromium op /usr/bin/chromium. De browsertest start zelf tijdelijk een server op poort 8000. RDW-antwoorden worden daarin gesimuleerd. Een geslaagde browsertest bewijst geen live beschikbaarheid van de RDW.
+Voor de live-koppelingen: start vanuit de checkout `php -S 0.0.0.0:8000 -t .` (`npm run start:live`). De Python-server hierboven is geschikt voor de statische site, maar voert geen PHP uit.
+
+Tests: `npm test` (Node 24). Backendtests: `php tests/live-data.test.php`. De test `python3 tests/live-browser.py` gebruikt expliciet gesimuleerde feeds; start daarvoor eerst PHP op poort 8001. Deze tests bewijzen geen live bronbeschikbaarheid. Browsercontrole: `python3 tests/browser_smoke.py` vereist Python Playwright en Chromium op /usr/bin/chromium. De browsertest start zelf tijdelijk een server op poort 8000. RDW-antwoorden worden daarin gesimuleerd. Een geslaagde browsertest bewijst geen live beschikbaarheid van de RDW.
 
 ## Publiceren op TransIP
 
