@@ -57,7 +57,7 @@ Upload bij deze ontwerpupdate index.html, styles.css en assets/netherlands-roads
 
 De complete horizontale `assets/brand-logo.png` blijft het zichtbare websitelogo.
 Voor het kleine site-icoon is er nu een apart vierkant `favicon.png`, met een
-herkenbaar goud DT-monogram. Alle vijf HTML-pagina's verwijzen ernaar met
+herkenbare gouden Crafter-oprijwagen met een auto op de laadbak. Alle vijf HTML-pagina's verwijzen ernaar met
 `rel="icon"` en `rel="apple-touch-icon"`. De icoon-URL is stabiel; er staat geen
 versieparameter achter.
 
