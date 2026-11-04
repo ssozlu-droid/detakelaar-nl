@@ -170,7 +170,7 @@ function dt_fetch(string $url): string {
         if ($result === false) {
             $reason = match (curl_errno($curl)) {
                 CURLE_OPERATION_TIMEDOUT => 'SOURCE_TIMEOUT',
-                CURLE_PEER_FAILED_VERIFICATION, CURLE_SSL_CONNECT_ERROR => 'SOURCE_TLS_FAILED',
+                CURLE_SSL_CACERT, CURLE_SSL_CONNECT_ERROR => 'SOURCE_TLS_FAILED',
                 CURLE_WRITE_ERROR => 'SOURCE_TOO_LARGE',
                 default => 'SOURCE_CONNECTION_FAILED',
             };
