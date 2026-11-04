@@ -67,3 +67,14 @@ Op 4 november 2026 leverde de eigenaar een echte PDOK-suggest-response aan met
 browser bereikbaar bevestigd. De volledige suggest/lookup/WhatsApp-flow is
 lokaal met expliciete fixtures gecontroleerd; een echte lookup en selectie op de
 gepubliceerde website moeten na het uploaden nog worden doorlopen.
+
+## Gewenste transportplanning
+
+Het aanvraagformulier vereist de keuze `Zo snel mogelijk`, `Deze week` of
+`Andere datum`. Alleen de laatste keuze toont een verplichte datumkiezer.
+Vandaag en toekomstige kalenderdatums zijn toegestaan; de ondergrens volgt
+Europe/Amsterdam. Bij terugschakelen naar een snelle keuze wordt de gekozen
+kalenderdatum gewist en uit het formulier gehaald. De voorkeur gaat als
+`Gewenste planning` mee in het WhatsApp-bericht; beschikbaarheid en planning
+blijven persoonlijk te bevestigen. Upload bij deze wijziging `index.html`,
+`app.js` en `vehicle.js` samen naar `/www`.

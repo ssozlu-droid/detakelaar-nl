@@ -5,6 +5,8 @@ from pathlib import Path
 from functools import partial
 from playwright.sync_api import sync_playwright
 import json
+from datetime import datetime,timedelta
+from zoneinfo import ZoneInfo
 root=Path(__file__).resolve().parents[1]
 server=ThreadingHTTPServer(('127.0.0.1',8000),partial(SimpleHTTPRequestHandler,directory=str(root)))
 Thread(target=server.serve_forever,daemon=True).start()
@@ -42,13 +44,41 @@ try:
    page.locator('#name').fill('Test klant')
    page.locator('#phone').fill('0612345678')
    page.locator('#type').select_option(label='Schadevervoer')
+   page.locator('#timing').select_option('asap')
    # Intercept the generated external link; do not submit an actual transport request.
-   page.evaluate("window.openedLinks=[]; HTMLAnchorElement.prototype.click=function(){window.openedLinks.push(this.href);this.id='generated-whatsapp-link';document.body.append(this)}")
+   page.evaluate("window.openedLinks=[]; HTMLAnchorElement.prototype.click=function(){if(typeof this.href!=='string'||!this.href.startsWith('https://wa.me/'))return;window.openedLinks.push(this.href);this.id='generated-whatsapp-link';document.body.append(this)}")
    page.locator('#send-button').click()
    page.wait_for_function('window.openedLinks.length > 0')
    link=page.locator('#generated-whatsapp-link').get_attribute('href')
    assert link.startswith('https://wa.me/31682990303?text=')
    assert 'Europalaan 93, 3526KP Utrecht' in page.locator('#message-text').input_value()
+   assert 'Gewenste planning: Zo snel mogelijk' in page.locator('#message-text').input_value()
+   # A specific day is required only for the custom-date choice.
+   today=datetime.now(ZoneInfo('Europe/Amsterdam')).date()
+   tomorrow=today+timedelta(days=1)
+   page.locator('#timing').select_option('date')
+   assert page.locator('#transport-date-field').is_visible()
+   assert page.locator('#transport-date').get_attribute('min')==today.isoformat()
+   assert page.locator('#message-fallback').is_hidden()
+   page.locator('#send-button').click()
+   assert page.evaluate('openedLinks.length')==1, 'Missing custom date must not open WhatsApp'
+   page.locator('#transport-date').fill((today-timedelta(days=1)).isoformat())
+   page.locator('#send-button').click()
+   assert page.evaluate('openedLinks.length')==1, 'Past date must not open WhatsApp'
+   page.locator('#transport-date').fill(tomorrow.isoformat())
+   page.locator('#send-button').click()
+   page.wait_for_function('openedLinks.length===2')
+   assert 'Gewenste planning: '+tomorrow.strftime('%d-%m-%Y') in page.locator('#message-text').input_value()
+   page.locator('#timing').select_option('week')
+   assert page.locator('#transport-date-field').is_hidden()
+   assert page.locator('#transport-date').is_disabled()
+   assert page.locator('#transport-date').input_value()==''
+   page.locator('#send-button').click()
+   page.wait_for_function('openedLinks.length===3')
+   assert 'Gewenste planning: Deze week' in page.locator('#message-text').input_value()
+   assert tomorrow.strftime('%d-%m-%Y') not in page.locator('#message-text').input_value()
+   page.locator('#timing').select_option('asap')
+
    page.locator('#plate').fill('xy-99-zz')
    assert page.locator('#vehicle').input_value()==''
    page.unroute('https://opendata.rdw.nl/**')
@@ -62,7 +92,7 @@ try:
    assert not errors,errors
    page.goto('http://127.0.0.1:8000/')
    page.screenshot(path=f'/tmp/detakelaar-{width}.png',full_page=True)
-   print(f'PASS: {width}px — layout, contact links, RDW success/empty/network failure, stale data, verified-address WhatsApp payload')
+   print(f'PASS: {width}px — layout, contact links, RDW success/empty/network failure, stale data, verified-address WhatsApp payload, transport timing and date validation')
    page.close()
   page=browser.new_page(viewport={'width':1200,'height':630})
   page.goto('http://127.0.0.1:8000/assets/og.svg')

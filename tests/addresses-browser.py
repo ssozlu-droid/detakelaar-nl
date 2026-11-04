@@ -31,7 +31,7 @@ try:
    page.route('https://api.pdok.nl/**',pdok)
    page.route('**/api/*.php',lambda r:r.fulfill(status=503,content_type='application/json',body='{"status":"unavailable"}'))
    page.goto('http://127.0.0.1:8002/')
-   page.locator('#name').fill('Test');page.locator('#phone').fill('0612345678');page.locator('#type').select_option(label='Regulier autotransport')
+   page.locator('#name').fill('Test');page.locator('#phone').fill('0612345678');page.locator('#type').select_option(label='Regulier autotransport');page.locator('#timing').select_option('asap')
    page.evaluate("window.openedLinks=[];HTMLAnchorElement.prototype.click=function(){if(this.href)window.openedLinks.push(this.href)}")
    page.locator('#pickup').fill('poepstraat 2423423')
    page.wait_for_function("document.getElementById('pickup-address-status').textContent.includes('Geen volledig adres')")
