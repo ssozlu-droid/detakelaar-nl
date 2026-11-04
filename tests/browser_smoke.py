@@ -28,6 +28,12 @@ try:
    page.goto('http://127.0.0.1:8000/')
    assert page.locator('[data-contact="tel"]').get_attribute('href')=='tel:+31682990303'
    assert page.locator('[data-contact="whatsapp"]').get_attribute('href')=='https://wa.me/31682990303'
+   assert ' '.join(page.locator('.hero h1').inner_text().split())=='Jouw auto. Onze zorg.'
+   assert ' '.join(page.locator('.lookup-card h2').inner_text().split())=='Waar mogen we je mee helpen?'
+   for icon in page.locator('#hero-contact .contact-icon').all():
+    box=icon.bounding_box()
+    assert abs(box['width']-box['height'])<.1 and box['width']>=19, 'Contact icon distorted or compressed'
+
    assert page.locator('#plate').bounding_box()['y']<height, 'Plate below first screen'
    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Horizontal overflow'
    page.locator('#plate').fill('ab-12-cd')
