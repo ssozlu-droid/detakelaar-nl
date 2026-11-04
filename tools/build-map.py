@@ -1,6 +1,7 @@
 """Build the static background from the checked-in Natural Earth geographic extract.
 Run from any directory: python3 tools/build-map.py. No third-party dependencies.
 """
+import gzip
 import json
 import math
 from pathlib import Path
@@ -14,7 +15,7 @@ def project(point):
     return 540 + (lon - 3.2) * 175, 65 + (merc(53.65) - merc(lat)) * 175
 
 def line(coords, close=False):
-    return 'M' + 'L'.join(f'{x:.1f},{y:.1f}' for x, y in map(project, coords)) + ('Z' if close else '')
+    return 'M' + 'L'.join(f'{x:.3f},{y:.3f}' for x, y in map(project, coords)) + ('Z' if close else '')
 
 def path(geometry):
     coords = geometry['coordinates']
@@ -26,14 +27,14 @@ def path(geometry):
     raise ValueError(kind)
 
 land = path(features[0]['geometry'])
-roads = [f for f in features if f['properties']['layer'] == 'roads']
-major = [f for f in roads if f['properties']['type'] == 'Major Highway']
-minor = [f for f in roads if f not in major]
+roads = json.loads(gzip.decompress((ROOT / 'tools/map-data/roads.geojson.gz').read_bytes()))['features']
+major = [f for f in roads if f['properties']['route'].startswith('A')]
+minor = [f for f in roads if f['properties']['route'].startswith('N')]
 highlight = [f for f in major if f['properties']['route'] in ('A4', 'A12')]
-paths = lambda fs: ''.join(f'<path d="{path(f["geometry"])}"/>' for f in fs)
+paths = lambda fs: ''.join(f'<path data-road="{f["properties"].get("route", "")}" d="{path(f["geometry"])}"/>' for f in fs)
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1100" viewBox="0 0 1440 1100" fill="none">
 <title>Nederland — kust, eilanden en snelwegen in zwart en goud</title>
-<desc>Geografische gegevens: Natural Earth 1:10m, publiek domein. Mercatorprojectie. Gegeneraliseerde overzichtskaart, niet voor navigatie.</desc>
+<desc>Wegen: © OpenStreetMap-bijdragers (ODbL), extractie november 2026. Kust en water: Natural Earth, publiek domein. Mercatorprojectie; overzichtskaart, niet voor navigatie.</desc>
 <defs>
 <radialGradient id="land"><stop stop-color="#26251b"/><stop offset="1" stop-color="#151916"/></radialGradient>
 <linearGradient id="gold" x1="600" y1="900" x2="1200" y2="150" gradientUnits="userSpaceOnUse"><stop stop-color="#8c6936"/><stop offset=".5" stop-color="#e2c17c"/><stop offset="1" stop-color="#a78348"/></linearGradient>
@@ -41,19 +42,19 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1100" vie
 <g id="highways">{paths(major)}</g>
 </defs>
 <path d="{land}" fill="url(#land)" fill-rule="evenodd" stroke="#a88c54" stroke-opacity=".32" stroke-width="1.1"/>
-<g clip-path="url(#nl)">
+<g>
 <g fill="#101313" stroke="#a88c54" stroke-opacity=".18" stroke-width=".7">{paths([f for f in features if f['properties']['layer'] == 'lakes'])}</g>
-<g stroke="#b39359" stroke-opacity=".14" stroke-width=".65" stroke-linejoin="round">{paths(minor)}</g>
+<g stroke="#919a99" opacity=".32" stroke-width=".48" stroke-linejoin="round" stroke-linecap="round">{paths(minor)}</g>
 <g stroke-linejoin="round" stroke-linecap="round">
-<use href="#highways" stroke="#cda75f" stroke-width="5" opacity=".08"/>
-<use href="#highways" stroke="#493e27" stroke-width="2.7"/>
-<use href="#highways" stroke="url(#gold)" stroke-width="1.15" opacity=".78"/>
-<g stroke="#e6c886" stroke-width="1.9">{paths(highlight)}</g>
+<use href="#highways" stroke="#cda75f" stroke-width="3" opacity=".06"/>
+<use href="#highways" stroke="#493e27" stroke-width="1.7"/>
+<use href="#highways" stroke="url(#gold)" stroke-width=".95" opacity=".85"/>
+<g stroke="#e6c886" stroke-width="1.2">{paths(highlight)}</g>
 </g></g>
 '''
 # Attach shields to actual route vertices, never to hand-drawn road alignments.
 for route, target in [('A4', (4.56, 52.18)), ('A12', (4.8, 52.04)), ('A12', (5.85, 52.04))]:
-    vertices = [p for f in highlight if f['properties']['route'] == route for p in f['geometry']['coordinates']]
+    vertices = [p for f in highlight if f['properties']['route'] == route for coords in f['geometry']['coordinates'] for p in coords]
     point = min(vertices, key=lambda p: (p[0]-target[0])**2 + (p[1]-target[1])**2)
     x,y = project(point)
     svg += f'<g transform="translate({x-20:.1f} {y-29:.1f})"><path d="M20 24v5" stroke="#b99859"/><rect width="40" height="24" rx="5" fill="#1b1e18" stroke="#ad8c4f" stroke-opacity=".7"/><text x="20" y="16" fill="#e8ce95" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700" text-anchor="middle">{route}</text></g>\n'

@@ -10,7 +10,7 @@
 .review-panel{display:grid;grid-template-columns:1.5fr 1fr;align-items:center;gap:36px;background:var(--panel);border:1px solid #d8b57440;border-radius:12px;padding:32px}.review-panel p:not(.eyebrow){color:var(--muted)}.review-action{border-left:1px solid var(--line);padding-left:30px}.review-action .button{justify-content:center;text-align:center}@media(max-width:650px){.review-panel{grid-template-columns:1fr;gap:16px;padding:24px}.review-action{border-left:0;border-top:1px solid var(--line);padding:16px 0 0}}
 
 /* Decorative Dutch motorway network; text and form panels remain foreground. */
-body{background-color:#101313;background-image:linear-gradient(90deg,rgba(16,19,19,.96) 0%,rgba(16,19,19,.78) 25%,rgba(16,19,19,.32) 63%,rgba(16,19,19,.2) 100%),url("assets/netherlands-roads.svg");background-repeat:no-repeat;background-position:center top,calc(50% - 100px) top;background-size:cover;background-attachment:fixed}.hero{isolation:isolate}.lookup-card{background:linear-gradient(140deg,rgba(36,39,32,.97),rgba(25,28,25,.97))}.request-card,.services article,.review-panel,.location-grid article{background-color:rgba(24,27,24,.96)}@media(max-width:650px){body{background-image:linear-gradient(180deg,rgba(16,19,19,.6),rgba(16,19,19,.76) 65%,#101313),url("assets/netherlands-roads.svg");background-position:center top,72% 90px;background-size:cover,auto 640px;background-attachment:scroll}.hero-copy{padding:8px 0 0}.hero .lead{max-width:330px}}
+body{background-color:#101313;background-image:linear-gradient(90deg,rgba(16,19,19,.96) 0%,rgba(16,19,19,.78) 25%,rgba(16,19,19,.32) 63%,rgba(16,19,19,.2) 100%),url("assets/netherlands-roads.svg?v=20261104-precise");background-repeat:no-repeat;background-position:center top,calc(50% - 100px) top;background-size:cover;background-attachment:fixed}.hero{isolation:isolate}.lookup-card{background:linear-gradient(140deg,rgba(36,39,32,.97),rgba(25,28,25,.97))}.request-card,.services article,.review-panel,.location-grid article{background-color:rgba(24,27,24,.96)}@media(max-width:650px){body{background-image:linear-gradient(180deg,rgba(16,19,19,.6),rgba(16,19,19,.76) 65%,#101313),url("assets/netherlands-roads.svg?v=20261104-precise");background-position:center top,72% 90px;background-size:cover,auto 640px;background-attachment:scroll}.hero-copy{padding:8px 0 0}.hero .lead{max-width:330px}}
 
 /* Integrated flatbed transporter wordmark. */
 .brand-logo{flex-shrink:0;line-height:0}.brand-logo img{display:block;width:300px;height:auto;max-width:100%}.footer .brand-logo img{width:240px}@media(max-width:650px){.header .brand-logo img{width:220px;height:auto}.header{gap:8px}.footer .brand-logo img{width:220px}}@media(max-width:360px){.header .brand-logo img{width:180px}}
@@ -66,3 +66,10 @@ body{isolation:isolate}.traffic-background{position:fixed;inset:0;z-index:-1;ove
  .hero .lookup-card .card-heading,.hero .lookup-card>p:not(#lookup-status){display:none}
  .hero .lookup-card h2{margin-top:0}
 }
+
+/* Base geometry and live traffic are drawn together; the CSS map is a no-JS fallback. */
+body.map-integrated{background-image:linear-gradient(90deg,rgba(16,19,19,.96) 0%,rgba(16,19,19,.78) 25%,rgba(16,19,19,.32) 63%,rgba(16,19,19,.2) 100%)}
+.traffic-live-layer .traffic-segment{stroke:#f46c60;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.traffic-live-layer .traffic-point{fill:#f46c60;stroke:#221919;stroke-width:.9}
+.map-credit{display:block;margin-top:12px;font-size:10px;line-height:1.7;color:var(--muted)}.map-credit a{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:650px){body.map-integrated{background-image:linear-gradient(180deg,rgba(16,19,19,.6),rgba(16,19,19,.76) 65%,#101313)}}

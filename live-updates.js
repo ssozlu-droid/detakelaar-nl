@@ -1,3 +1,4 @@
+import {createRoadIndex, roadDataFromPaths, matchTrafficGeometry} from './traffic-map.js?v=20261104-precise';
 const SVG = 'http://www.w3.org/2000/svg';
 const MAX_TRAFFIC_AGE = 300_000;
 const MAX_NEWS_AGE = 72 * 60 * 60 * 1000;
@@ -55,6 +56,9 @@ export function initLiveUpdates() {
   svg.setAttribute('viewBox', '0 0 1440 1100');
   svg.setAttribute('aria-hidden', 'true');
   backdrop.append(svg);
+  const trafficLayer = document.createElementNS(SVG, 'g');
+  trafficLayer.setAttribute('class', 'traffic-live-layer');
+  let roadIndex;
   let trafficExpiry = 0;
   let newsExpiry = 0;
   let articleExpiry = 0;
@@ -78,7 +82,7 @@ export function initLiveUpdates() {
   smallScreen.addEventListener('change', alignMap);
   alignMap();
   const clearTraffic = () => {
-    svg.replaceChildren();
+    trafficLayer.replaceChildren();
     trafficExpiry = 0;
     trafficList.replaceChildren();
     trafficStatus.textContent = 'Verkeersinformatie tijdelijk niet beschikbaar';
@@ -90,16 +94,45 @@ export function initLiveUpdates() {
     newsStatus.textContent = 'Nieuws kan op dit moment niet worden opgehaald. Bekijk de laatste berichten bij de bron.';
     newsExpiry = 0; articleExpiry = 0;
   };
-  const fetchJSON = async url => {
+  const fetchJSON = async (url, maxSize = 2_000_000) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15_000);
     try {
       const response = await fetch(url, {signal: controller.signal, cache: 'no-store', credentials: 'same-origin'});
       if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) throw new Error('Feed unavailable');
       const text = await response.text();
-      if (text.length > 2_000_000) throw new Error('Oversized feed');
+      if (text.length > maxSize) throw new Error('Oversized feed');
       return JSON.parse(text);
     } finally { clearTimeout(timeout); }
+  };
+  // One SVG contains both real roads and live reports: one viewBox, one transform.
+  let mapReady = null;
+  const ensureMap = () => {
+    if (mapReady) return mapReady;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15_000);
+    mapReady = fetch('assets/netherlands-roads.svg?v=20261104-precise', {
+      cache: 'force-cache', signal: controller.signal
+    }).then(async response => {
+      if (!response.ok) throw new Error('Map unavailable');
+      const text = await response.text();
+      if (text.length > 6_000_000) throw new Error('Oversized map');
+      const map = new DOMParser().parseFromString(text, 'image/svg+xml');
+      if (map.querySelector('parsererror') || map.documentElement.localName !== 'svg'
+          || map.querySelector('script,foreignObject,image')) throw new Error('Invalid map');
+      return map.documentElement;
+    }).then(map => {
+      const paths = Array.from(map.querySelectorAll('path[data-road]'), path => ({
+        road: path.getAttribute('data-road'), d: path.getAttribute('d')
+      }));
+      roadIndex = createRoadIndex(roadDataFromPaths(paths));
+      svg.replaceChildren(...Array.from(map.childNodes, child => document.importNode(child, true)), trafficLayer);
+      document.body.classList.add('map-integrated');
+    }).catch(error => {
+      mapReady = null; // Retry a failed asset download at the next traffic refresh.
+      throw error;
+    }).finally(() => clearTimeout(timeout));
+    return mapReady;
   };
   const renderTraffic = data => {
     if (!trafficIsFresh(data)) throw new Error('Stale traffic response');
@@ -107,34 +140,26 @@ export function initLiveUpdates() {
     const list = document.createDocumentFragment();
     let drawn = 0;
     for (const report of data.jams) {
-      const geometry = report?.geometry;
+      const road = typeof report.road === 'string' && /^[AN]\d{1,3}$/.test(report.road) ? report.road : 'Filemelding';
+      const geometry = matchTrafficGeometry(roadIndex, road, report?.geometry, projectTrafficPoint);
       if (!geometry) continue;
       let shape;
       if (geometry.type === 'Point') {
-        const point = projectTrafficPoint(geometry.coordinates);
-        if (!point) continue;
+        const point = geometry.coordinates;
         shape = document.createElementNS(SVG, 'circle');
-        shape.setAttribute('cx', point[0].toFixed(2)); shape.setAttribute('cy', point[1].toFixed(2));
-        shape.setAttribute('r', '3.5'); shape.setAttribute('class', 'traffic-point');
-      } else if (geometry.type === 'MultiLineString' && Array.isArray(geometry.coordinates) && geometry.coordinates.length <= 100) {
-        const paths = [];
-        for (const line of geometry.coordinates) {
-          if (!Array.isArray(line) || line.length < 2 || line.length > 2000) continue;
-          const points = line.map(projectTrafficPoint);
-          if (points.some(point => point === null)) continue;
-          paths.push('M' + points.map(p => p.map(v => v.toFixed(2)).join(',')).join('L'));
-        }
-        if (!paths.length) continue;
+        shape.setAttribute('cx', point[0].toFixed(3)); shape.setAttribute('cy', point[1].toFixed(3));
+        shape.setAttribute('r', '2.6'); shape.setAttribute('class', 'traffic-point');
+      } else {
         shape = document.createElementNS(SVG, 'path');
-        shape.setAttribute('d', paths.join('')); shape.setAttribute('class', 'traffic-segment');
-      } else continue;
-      const road = typeof report.road === 'string' && /^[AN]\d{1,3}$/.test(report.road) ? report.road : 'Filemelding';
+        shape.setAttribute('d', geometry.coordinates.map(line => 'M' + line.map(p => p.map(v => v.toFixed(3)).join(',')).join('L')).join(''));
+        shape.setAttribute('class', 'traffic-segment');
+      }
       const kind = {stationaryTraffic: 'stilstaand verkeer', queuingTraffic: 'file', slowTraffic: 'langzaam verkeer', trafficCongestion: 'file'}[report.type] || 'file';
-      const title = document.createElementNS(SVG, 'title'); title.textContent = `${road}: ${kind}`;
+      const title = document.createElementNS(SVG, 'title'); title.textContent = `${road}: ${kind}${geometry.locationOnly ? ' — alleen locatie bekend; geen bevestigd traject' : ''}`;
       shape.append(title); graphics.append(shape); drawn++;
-      if (drawn <= 5) list.append(node('li', '', `${road} · ${kind}${geometry.type === 'Point' ? ' (puntmelding)' : ''}`));
+      if (drawn <= 5) list.append(node('li', '', `${road} · ${kind}${geometry.locationOnly ? ' (locatiemelding)' : ''}`));
     }
-    svg.replaceChildren(graphics); trafficList.replaceChildren(list);
+    trafficLayer.replaceChildren(graphics); trafficList.replaceChildren(list);
     trafficExpiry = Date.parse(data.expiresAt);
     trafficStatus.dataset.state = 'current';
     trafficStatus.textContent = drawn ? `${drawn} filelocatie${drawn === 1 ? '' : 's'} op de kaart` : 'Geen tekenbare filemeldingen in deze bronupdate';
@@ -166,7 +191,7 @@ export function initLiveUpdates() {
   const updateTraffic = async () => {
     if (trafficBusy || document.hidden) return;
     trafficBusy = true; trafficChecked = Date.now();
-    try { renderTraffic(await fetchJSON('api/traffic.php')); } catch { clearTraffic(); }
+    try { const [data] = await Promise.all([fetchJSON('api/traffic.php'), ensureMap()]); renderTraffic(data); } catch { clearTraffic(); }
     finally { trafficBusy = false; }
   };
   const updateNews = async () => {

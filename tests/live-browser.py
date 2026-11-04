@@ -3,12 +3,16 @@ Start a server at LIVE_TEST_BASE (defaults to http://127.0.0.1:8001).
 """
 from playwright.sync_api import sync_playwright
 from datetime import datetime, timezone, timedelta
-import json, os, urllib.request, urllib.error
+import json, os, urllib.request, urllib.error, gzip, math
+from pathlib import Path
+roads=json.loads(gzip.decompress((Path(__file__).resolve().parents[1]/"tools/map-data/roads.geojson.gz").read_bytes()))
+a12=next(f for f in roads["features"] if f["properties"]["route"]=="A12")["geometry"]["coordinates"]
+curve=next(line for line in a12 if len(line)>=8 and sum(math.dist(a,b) for a,b in zip(line,line[1:]))<1.5*math.dist(line[0],line[-1]))
 base=os.environ.get('LIVE_TEST_BASE','http://127.0.0.1:8001')
 now=datetime.now(timezone.utc)
 iso=lambda delta: (now+timedelta(seconds=delta)).isoformat()
 traffic={'status':'ok','source':'NDW','sourceUpdatedAt':iso(-20),'checkedAt':iso(0),'expiresAt':iso(280),'unmappedReports':1,'jams':[
- {'id':'test-only-line','road':'A12','type':'queuingTraffic','geometry':{'type':'MultiLineString','coordinates':[[[4.60,52.04],[4.65,52.05],[4.70,52.06]]]}},
+ {'id':'test-only-line','road':'A12','type':'queuingTraffic','geometry':{'type':'MultiLineString','coordinates':[[curve[0],curve[-1]]]}},
  {'id':'test-only-point','road':'A4','type':'slowTraffic','geometry':{'type':'Point','coordinates':[4.40,52.05]}}]}
 news={'status':'ok','source':'NU.nl Auto','checkedAt':iso(0),'expiresAt':iso(1100),'articles':[
  {'title':'TESTKOP — uitsluitend gesimuleerde brondata','url':'https://www.nu.nl/auto/1/test','publishedAt':iso(-3600)},
@@ -25,6 +29,10 @@ with sync_playwright() as p:
   page.goto(base+'/')
   page.wait_for_selector('.traffic-segment',state='attached')
   assert page.locator('.traffic-segment').count()==1
+  assert page.locator('body.map-integrated').count()==1
+  assert page.locator('[data-traffic-background] svg #highways').count()==1
+  assert page.locator('.traffic-segment').get_attribute('d').count('L')>=7
+  assert page.locator('[data-traffic-background] svg').count()==1
   assert page.locator('.traffic-point').count()==1
   assert '2 filelocaties' in page.locator('[data-traffic-status]').inner_text()
   assert page.locator('.news-card').count()==3
@@ -58,6 +66,29 @@ with sync_playwright() as p:
  assert page.locator('.traffic-segment,.traffic-point').count()==0
  assert page.locator('[data-traffic-status]').get_attribute('data-state')=='unavailable'
  print('PASS expiry timer: current red roads disappear after provider expiry')
+ page.close()
+ # A failed base-map download must not draw unmatched traffic; a later refresh retries.
+ page=browser.new_page()
+ page.clock.install(time=now)
+ attempts=[0]
+ def map_response(route):
+  if route.request.resource_type=='fetch':
+   attempts[0]+=1
+   if attempts[0]==1:
+    route.fulfill(status=503,body='unavailable');return
+  route.continue_()
+ page.route('**/assets/netherlands-roads.svg?*',map_response)
+ page.route('**/api/traffic.php',lambda r:r.fulfill(content_type='application/json',body=json.dumps(traffic)))
+ page.route('**/api/news.php',lambda r:r.fulfill(status=503,content_type='application/json',body='{}'))
+ page.goto(base+'/')
+ page.wait_for_function("document.querySelector('[data-traffic-status]').dataset.state==='unavailable'")
+ assert page.locator('.traffic-segment,.traffic-point').count()==0
+ assert page.locator('body.map-integrated').count()==0
+ page.clock.fast_forward(61000)
+ page.wait_for_selector('body.map-integrated')
+ page.wait_for_selector('.traffic-segment',state='attached')
+ assert attempts[0]==2
+ print('PASS failed map asset: static fallback, no detached red roads, retry succeeds')
  page.close()
  # No JS still offers a useful static site and source links.
  page=browser.new_page(java_script_enabled=False)
