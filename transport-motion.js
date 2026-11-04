@@ -13,7 +13,11 @@ if (scene) {
     motion.toggleAttribute('hidden', !active);
     still.hidden = active;
     button.hidden = !active;
-    scene.classList.toggle('motion-running', active && visible && !paused && !document.hidden);
+    const running = active && visible && !paused && !document.hidden;
+    scene.classList.toggle('motion-running', running);
+    scene.classList.toggle('motion-enabled', active);
+    scene.closest('.journey-intro').classList.toggle('journey-driving', running);
+    scene.closest('.journey-intro').classList.toggle('journey-road-enabled', active);
     button.setAttribute('aria-pressed', String(paused));
     button.textContent = paused ? 'Animatie afspelen' : 'Animatie pauzeren';
   };
