@@ -52,3 +52,25 @@ De homepage bevat een reviewsectie. De eigenaar bevestigt dat er nog geen Google
 ## Zwart-gouden kaartachtergrond
 
 Upload bij deze ontwerpupdate index.html, styles.css en assets/netherlands-roads.svg. Het SVG-bestand is een zelf getekend, decoratief en vereenvoudigd Nederlands wegennet, geen navigatiekaart. A4 en A12 zijn extra aangezet. Er worden geen externe kaartdiensten geladen voor de achtergrond. Behoud alle overige websitebestanden en .htaccess. Vernieuw na upload de browsercache.
+
+## Site-icoon in Google en browsertab
+
+De complete horizontale `assets/brand-logo.png` blijft het zichtbare websitelogo.
+Voor het kleine site-icoon is er nu een apart vierkant `favicon.png`, met een
+herkenbaar goud DT-monogram. Alle vijf HTML-pagina's verwijzen ernaar met
+`rel="icon"` en `rel="apple-touch-icon"`. De icoon-URL is stabiel; er staat geen
+versieparameter achter.
+
+Upload `favicon.png` naar `/www/favicon.png` en vervang de vijf bijgewerkte
+HTML-pagina's: `index.html`, `autotransport.html`, `pechhulp-schadevervoer.html`,
+`zorgvuldig-autovervoer.html` en `privacy.html`. Laat `.htaccess` intact.
+Controleer dat `https://detakelaar.nl/favicon.png` rechtstreeks de vierkante
+PNG-afbeelding teruggeeft (geen WordPress-pagina, login, 404 of downloadbestand
+met de verkeerde extensie). `robots.txt` mag Googlebot en Googlebot-Image niet
+blokkeren; de versie in de repository staat deze toegang toe.
+
+Daarna kan de eigenaar in Google Search Console de homepage-URL inspecteren en
+herindexering aanvragen. Google moet homepage en icoon opnieuw crawlen.
+Weergave in zoekresultaten is aan Google; direct verschijnen of een vaste
+verwerkingstijd kan niet worden gegarandeerd. Een browserrefresh vernieuwt niet
+de zoekresultaten van Google.
